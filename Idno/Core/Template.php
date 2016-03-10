@@ -106,7 +106,7 @@
              * @param $posse_links containing Entity::getPosseLinks()
              * @return \Bonita\false|string
              */
-            function drawSyndication($content_type, $posse_links)
+            function drawSyndication($content_type, $posse_links = [])
             {
                 return $this->__(array('services'     => \Idno\Core\Idno::site()->syndication()->getServices($content_type),
                                        'content_type' => $content_type,
@@ -292,7 +292,7 @@
                         return $matches[1];
                     }
 
-                    if (preg_match('/\#[A-Fa-f0-9]{6}/', $matches[1])) {
+                    if (preg_match('/\#[A-Fa-f0-9]{6}$/', $matches[1])) {
                         return $matches[1];
                     }
 

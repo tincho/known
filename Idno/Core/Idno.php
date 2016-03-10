@@ -27,10 +27,10 @@
             public $pagehandlers;
             public $public_pages;
             public $syndication;
+            /* @var \Psr\Log\LoggerInterface $logging */
             public $logging;
-            /* @var \Idno\Core\Logging $logging */
-            public static $site;
             /* @var \Idno\Core\Idno $site */
+            public static $site;
             public $currentPage;
             public $known_hub;
             public $helper_robot;
@@ -109,7 +109,7 @@
                 $this->logging = new Logging();
                 $this->config->load();
 
-                if (isset($this->config->loglevel)) {
+                if (isset($this->config->loglevel) && $this->logging instanceof Logging) {
                     $this->logging->setLogLevel($this->config->loglevel);
                 }
 
@@ -122,7 +122,7 @@
                 $this->helper_robot = new HelperRobot();
 
                 // Attempt to create a cache object, making use of support present on the system
-                if (extension_loaded('apc'))
+                if (extension_loaded('apc') && ini_get('apc.enabled'))
                     $this->cache = new \Idno\Caching\APCuCache();
                 elseif (extension_loaded('xcache')) {
                     $this->cache = new \Idno\Caching\XCache();
@@ -130,10 +130,10 @@
                 // TODO: Support other persistent caching methods
 
                 // No URL is a critical error, default base fallback is now a warning (Refs #526)
-                if (!$this->config->url) throw new \Exception('Known was unable to work out your base URL! You might try setting url="http://yourdomain.com/" in your config.ini');
-                if ($this->config->url == '/') \Idno\Core\Idno::site()->logging->log('Base URL has defaulted to "/" because Known was unable to detect your server name. '
+                if (!$this->config->url) throw new \Idno\Exceptions\ConfigurationException('Known was unable to work out your base URL! You might try setting url="http://yourdomain.com/" in your config.ini');
+                if ($this->config->url == '/') $this->logging->warning('Base URL has defaulted to "/" because Known was unable to detect your server name. '
                     . 'This may be because you\'re loading Known via a script. '
-                    . 'Try setting url="http://yourdomain.com/" in your config.ini to remove this message', LOGLEVEL_WARNING);
+                    . 'Try setting url="http://yourdomain.com/" in your config.ini to remove this message');
 
                 // Connect to a Known hub if one is listed in the configuration file
                 // (and this isn't the hub!)
@@ -217,6 +217,10 @@
                 $this->addPageHandler('/begin/connect/?', '\Idno\Pages\Onboarding\Connect');
                 $this->addPageHandler('/begin/connect\-forwarder/?', '\Idno\Pages\Onboarding\ConnectForwarder');
                 $this->addPageHandler('/begin/publish/?', '\Idno\Pages\Onboarding\Publish');
+                
+                /** Add some services */
+                $this->addPageHandler('/service/db/optimise/?', '\Idno\Pages\Service\Db\Optimise');
+                $this->addPageHandler('/service/vendor/messages/?', '\Idno\Pages\Service\Vendor\Messages');
 
                 // These must be loaded last
                 $this->plugins = new Plugins();
@@ -264,7 +268,7 @@
 
             /**
              * Returns the current logging interface
-             * @return \Idno\Core\Logging
+             * @return \Psr\Log\LoggerInterface
              */
             function &logging()
             {
@@ -439,7 +443,7 @@
                         $this->public_pages[] = $handler;
                     }
                 } else {
-                    $this->logging()->log("Could not add $pattern. $handler not found", LOGLEVEL_ERROR);
+                    $this->logging()->error("Could not add $pattern. $handler not found");
                 }
             }
 
@@ -590,7 +594,7 @@
              */
             function version()
             {
-                return '0.9.0.4';
+                return '0.9.1';
             }
 
             /**
@@ -751,14 +755,15 @@
                 if (!empty(site()->config()->noping)) {
                     return '';
                 }
-                
+
                 $results    = Webservice::post('https://withknown.com/vendor-services/messages/', array(
                     'url'     => site()->config()->getURL(),
                     'title'   => site()->config()->getTitle(),
                     'version' => site()->getVersion(),
                     'public'  => site()->config()->isPublicSite(),
                     'dbengine' => get_class(site()->db()),
-                    'hub'     => site()->config()->known_hub
+                    'hub'     => site()->config()->known_hub,
+                    'phpversion' => phpversion()
                 ));
                 if ($results['response'] == 200) {
                     return $results['content'];
@@ -823,7 +828,7 @@
 
         /**
          * Helper function that returns the current site object
-         * @deprecated
+         * @deprecated Use \Idno\Core\Idno::site()
          * @return \Idno\Core\Idno $site
          */
         function &site()

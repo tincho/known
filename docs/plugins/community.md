@@ -9,9 +9,10 @@ listings here do not imply endorsement by the Known project team in any way.
 ### Content types
 
 * [Video](https://github.com/tjgillies/Video) – Post videos to your Known site, by [Tyler Gillies][]
-* [Recipe](https://github.com/cleverdevil/Known–Recipes) – Post recipes to your Known site, by [Jonathan LaCour][]
-* [Review](https://github.com/cleverdevil/Known–Reviews) – Post reviews to your Known site, by [Jonathan LaCour][]
+* [Recipe](https://github.com/cleverdevil/Known-Recipes) – Post recipes to your Known site, by [Jonathan LaCour][]
+* [Review](https://github.com/cleverdevil/Known-Reviews) – Post reviews to your Known site, by [Jonathan LaCour][]
 * [Reactions](https://github.com/kylewm/KnownReactions) – Indieweb–style likes and reposts, by [Kyle Mahan][] 
+* [Journal](https://github.com/tinokremer/KnownJournal) - Post journal entries to your Known site, by [Tino Kremer][]
 
 ### Syndication plugins
 
@@ -29,6 +30,7 @@ listings here do not imply endorsement by the Known project team in any way.
 * [Diaspora](https://github.com/Phyks/KnownDiaspora) – Crosspost content to a Diaspora site, by [Lukas Verney][]
 * [IRC](https://github.com/mapkyca/KnownIRC) – Post messages and links into IRC channels, 
     by [Marcus Povey][]
+* [IndieSyndicate](https://github.com/kylewm/KnownIndieSyndicate) – Syndicate via micropub, e.g. via [silo.pub](https://silo.pub), by [Kyle Mahan][]
 
 ### System and Security
 
@@ -44,6 +46,9 @@ listings here do not imply endorsement by the Known project team in any way.
     by [Marcus Povey][]
 * [NIST Passwords](https://github.com/mapkyca/KnownNISTPasswords) – Enforce minimum entropy requirements for passwords, 
     by [Marcus Povey][]
+* [Akismet](https://github.com/mapkyca/KnownAkismet) – Wordpress Akismet spam filtering support for comments and webmentions, 
+    by [Marcus Povey][]
+
 
 ### Browser Integration and Apps
 
@@ -61,7 +66,8 @@ listings here do not imply endorsement by the Known project team in any way.
 
 ### Themes
 
-...
+* [Material](https://github.com/physcocode/Material) – Google Material design style theme for known , by [Pranjal Pandey][]
+* [Nature](https://github.com/physcocode/nature) – Warm natural theme for known , by [Pranjal Pandey][]
 
 
 ### Misc
@@ -77,7 +83,12 @@ listings here do not imply endorsement by the Known project team in any way.
 * [Markdown](https://github.com/mapkyca/IdnoMarkdown) – Adds Markdown support for status and blog posts, 
    by [Marcus Povey][]
 * [InstagramShim](https://github.com/kylewm/KnownInstagramShim) – Sets POSSE links for Instagram photos imported via Micropub (e.g. using OwnYourGram), by [Kyle Mahan][]
+* [Lightbox](https://github.com/mapkyca/KnownLightbox) – Lightbox style popups for photos and pictures, 
+    by [Marcus Povey][]
+* [Emoji rendering](https://github.com/mapkyca/KnownEmoji) – Render Emoji characters (e.g. in Bridgy comments), 
+    by [Marcus Povey][]
 
+[Pranjal Pandey]: https://www.github.com/physcocode
 [Daniel Nix]: https://nxd4n.nixekinder.be
 [decsharing]: https://www.w3.org/community/decsharing/
 [Jonathan LaCour]: https://cleverdevil.io
@@ -88,6 +99,7 @@ listings here do not imply endorsement by the Known project team in any way.
 [Tim Owens]: http://timowens.io/
 [Tyler Gillies]: http://tylergillies.club/
 [Yann Sallou]: http://winds.fr/
+[Tino Kremer]: https://tinokremer.nl/
 
 ## Submissions
 

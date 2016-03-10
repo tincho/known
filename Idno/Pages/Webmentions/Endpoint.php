@@ -26,9 +26,8 @@
                 // Check that both source and target are non-empty
                 if (!empty($vars['source']) && !empty($vars['target']) && $vars['source'] != $vars['target']) {
 
-                    // Sanitize source and target
-                    $source = urldecode($vars['source']);
-                    $target = urldecode($vars['target']);
+                    $source = $vars['source'];
+                    $target = $vars['target'];
 
                     // Remove anchors from target URL, but save them to '#' input so we can still reference them later
                     if (strpos($target, '#')) {
@@ -67,12 +66,12 @@
                                 } else {
                                     $error      = 'no_link_found';
                                     $error_text = 'The source URI does not contain a link to the target URI.';
-                                    \Idno\Core\Idno::site()->logging->log('No link from ' . $source . ' to ' . $target, LOGLEVEL_ERROR);
+                                    \Idno\Core\Idno::site()->logging->warning('No link from ' . $source . ' to ' . $target);
                                 }
                             } else {
                                 $error      = 'source_not_found';
                                 $error_text = 'The source content for ' . $source . ' could not be obtained.';
-                                \Idno\Core\Idno::site()->logging->log('No content from ' . $source, LOGLEVEL_ERROR);
+                                \Idno\Core\Idno::site()->logging->warning('No content from '.$source);
                             }
                         } else {
                             $error      = 'target_not_supported';
@@ -81,7 +80,7 @@
                     } else {
                         $error      = 'target_not_found';
                         $error_text = 'The target page ' . $target . ' does not exist.';
-                        \Idno\Core\Idno::site()->logging()->log('Could not find handler for ' . $target, LOGLEVEL_ERROR);
+                        \Idno\Core\Idno::site()->logging()->error('Could not find handler for ' . $target);
                     }
                 }
                 $this->setResponse(400); // Webmention failed.

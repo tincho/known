@@ -23,8 +23,10 @@
                 ini_set('session.gc_maxlifetime', 60 * 60 * 24 * 7); // Garbage collection to match
 
                 header('P3P: CP="CAO PSA OUR"');
+                ini_set('session.use_only_cookies', true); // Only cookies for session
                 ini_set('session.cookie_httponly', true); // Restrict cookies to HTTP only (help reduce XSS attack profile)
                 ini_set('session.use_strict_mode', true); // Help mitigate session fixation
+                ini_set("session.use_trans_sid", false); // Prevent transparent IDs
                 if (Idno::site()->isSecure()) {
                     ini_set('session.cookie_secure', true); // Set secure cookies when site is secure
                 }
@@ -54,7 +56,7 @@
                     $this->validate();
                 } catch (\Exception $ex) {
                     // Session didn't validate, log & destroy
-                    \Idno\Core\Idno::site()->logging->log($ex->getMessage(), LOGLEVEL_ERROR);
+                    \Idno\Core\Idno::site()->logging->error('Error validating session', ['error' => $ex]);
 
                     $_SESSION = [];
                     session_destroy();
@@ -106,7 +108,7 @@
             {
                 // Check for secure sessions being delivered insecurely, and vis versa
                 if ($_SESSION['secure'] != Idno::site()->isSecure()) {
-                    throw new \Exception ('Session funnybusiness: Secure session accessed insecurely, or an insecure session accessed over TLS.');
+                    throw new \Idno\Exceptions\SecurityException('Session funnybusiness: Secure session accessed insecurely, or an insecure session accessed over TLS.');
                 }
             }
 
@@ -325,7 +327,7 @@
                 // Unset all session variables, as per PHP docs.
                 $_SESSION = [];
 
-                // Really log the user off by destroying the cookie 
+                // Really log the user off by destroying the cookie
                 // See https://secure.php.net/manual/en/function.session-destroy.php
                 if (!defined('KNOWN_UNIT_TEST')) {
                     if (ini_get("session.use_cookies")) {
@@ -395,7 +397,7 @@
 
                 // auth standard API requests
                 if (!$return && !empty($_SERVER['HTTP_X_KNOWN_USERNAME']) && !empty($_SERVER['HTTP_X_KNOWN_SIGNATURE'])) {
-                    \Idno\Core\Idno::site()->logging()->log("Attempting to auth via API credentials", LOGLEVEL_DEBUG);
+                    \Idno\Core\Idno::site()->logging()->debug("Attempting to auth via API credentials");
 
                     $this->setIsAPIRequest(true);
 
@@ -405,18 +407,18 @@
                     }
 
                     if ($user = \Idno\Entities\User::getByHandle($_SERVER['HTTP_X_KNOWN_USERNAME'])) {
-                        \Idno\Core\Idno::site()->logging()->log("API auth found user by username: " . $user->getName(), LOGLEVEL_DEBUG);
+                        \Idno\Core\Idno::site()->logging()->debug("API auth found user by username: " . $user->getName());
                         $key  = $user->getAPIkey();
                         $hmac = trim($_SERVER['HTTP_X_KNOWN_SIGNATURE']);
                         //$compare_hmac = base64_encode(hash_hmac('sha256', explode('?', $_SERVER['REQUEST_URI'])[0], $key, true));
                         $compare_hmac = base64_encode(hash_hmac('sha256', ($_SERVER['REQUEST_URI']), $key, true));
 
                         if ($hmac == $compare_hmac) {
-                            \Idno\Core\Idno::site()->logging()->log("API auth verified signature for user: " . $user->getName(), LOGLEVEL_DEBUG);
+                            \Idno\Core\Idno::site()->logging()->debug("API auth verified signature for user: " . $user->getName());
                             // TODO maybe this should set the current user without modifying $_SESSION?
                             $return = $this->refreshSessionUser($user);
                         } else {
-                            \Idno\Core\Idno::site()->logging()->log("API auth failed signature validation for user: " . $user->getName(), LOGLEVEL_DEBUG);
+                            \Idno\Core\Idno::site()->logging()->debug("API auth failed signature validation for user: " . $user->getName());
                         }
                     }
                 }
@@ -439,7 +441,7 @@
                             $ip      = trim($proxies[0]);
                         }
 
-                        \Idno\Core\Idno::site()->logging()->log("API Login failure from $ip", LOGLEVEL_ERROR);
+                        \Idno\Core\Idno::site()->logging()->error("API Login failure from $ip");
                         \Idno\Core\Idno::site()->currentPage()->deniedContent();
                     }
                 }

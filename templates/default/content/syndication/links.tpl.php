@@ -16,13 +16,21 @@
                 }
 
                 foreach($posse_links as $element) {
-                    $this->username = isset($element['account_id']) ? $element['account_id'] : false;
-                    $human_icon = $this->draw('content/syndication/icon/' . $service);
+                    $human_icon = $this->__([
+                        'username' => isset($element['account_id']) ? $element['account_id'] : false,
+                        'details'  => $element,
+                    ])->draw('content/syndication/icon/' . $service);
+
                     if (empty($human_icon)) {
                         $human_icon = $this->draw('content/syndication/icon/generic');
                     }
 
-                    echo '<a href="' . $element['url'] . '" rel="syndication" class="u-syndication ' . $service . '">' . $human_icon . ' ' . $element['identifier'] . '</a> ';
+                    $rel_syndication = '';
+                    if (\Idno\Core\Idno::site()->currentPage()->isPermalink()) {
+                        $rel_syndication = ' rel="syndication"';
+                    }
+
+                    echo "<a href=\"{$element['url']}\"$rel_syndication class=\"u-syndication $service\">$human_icon {$element['identifier']}</a>";
                 }
             }
 

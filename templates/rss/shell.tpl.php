@@ -46,7 +46,7 @@
         }
         $channel->appendChild($site_description);
     }
-    $channel->appendChild($page->createElement('link',$base_url));
+    $channel->appendChild($page->createElement('link', htmlspecialchars($base_url)));
     if (!empty(\Idno\Core\Idno::site()->config()->hub)) {
         $pubsub = $page->createElement('atom:link');
         $pubsub->setAttribute('href',\Idno\Core\Idno::site()->config()->hub);
@@ -68,9 +68,6 @@
     // If we have a feed, add the items
     if (!empty($vars['items'])) {
         foreach($vars['items'] as $item) {
-            if ($item instanceof \Idno\Entities\ActivityStreamPost) {
-                $item = $item->getObject();
-            }
             if (!($item instanceof \Idno\Common\Entity)) {
                 continue;
             }
@@ -87,11 +84,11 @@
             $rssItem->appendChild($page->createElement('link',$item->getSyndicationURL()));
             $rssItem->appendChild($page->createElement('guid',$item->getUUID()));
             $rssItem->appendChild($page->createElement('pubDate',date(DATE_RSS,$item->created)));
-            
+
             $owner = $item->getOwner();
             $rssItem->appendChild($page->createElement('author', "{$owner->title}"));
             //$rssItem->appendChild($page->createElement('dc:creator', $owner->title));
-            
+
             $description = $page->createElement('description');
             if (empty($vars['nocdata'])) {
                 $description->appendChild($page->createCDATASection($item->draw(true)));

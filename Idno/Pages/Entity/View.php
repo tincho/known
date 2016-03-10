@@ -66,7 +66,7 @@
                 $t->__(array(
 
                     'title'       => $object->getTitle(),
-                    'body'        => $t->__(array('object' => $object->getRelatedFeedItems()))->draw('entity/shell'),
+                    'body'        => $t->__(['object' => $object])->draw('entity/shell'),
                     'description' => $object->getShortDescription()
 
                 ))->drawPage();
@@ -83,7 +83,7 @@
                     }
                 }
                 if (empty($object)) {
-                    \Idno\Core\Idno::site()->logging->log("No object was found with ID {$this->arguments[0]}.", LOGLEVEL_ERROR);
+                    \Idno\Core\Idno::site()->logging->error("No object was found with ID {$this->arguments[0]}.");
 
                     return false;
                 }

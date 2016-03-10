@@ -10,7 +10,6 @@
     namespace Idno\Core {
 
         use Idno\Common\Entity;
-        use Idno\Entities\ActivityStreamPost;
 
         class PubSubHubbub extends \Idno\Common\Component
         {
@@ -23,15 +22,13 @@
             function registerEventHooks()
             {
 
-                // Hook into the "saved" event to publish to PuSH when an entity is saved
-                \Idno\Core\Idno::site()->addEventHook('saved', function (\Idno\Core\Event $event) {
+                // Hook into the "published" event to inform the PuSH hub when an entity is published
+                \Idno\Core\Idno::site()->addEventHook('published', function (\Idno\Core\Event $event) {
                     $eventdata = $event->data();
                     if ($object = $eventdata['object']) {
                         /* @var \Idno\Common\Entity $object */
-                        if ($object instanceof \Idno\Entities\ActivityStreamPost) {
-                            if ($object->isPublic()) {
-                                \Idno\Core\PubSubHubbub::publish($object);
-                            }
+                        if ($object->isPublic()) {
+                            \Idno\Core\PubSubHubbub::publish($object);
                         }
                     }
                 });
@@ -85,9 +82,9 @@
                                     'hub.topic'    => $feed, // Subscribe to rss
                                 ));
 
-                                \Idno\Core\Idno::site()->logging->log("Pubsub: " . print_r($return, true));
+                                \Idno\Core\Idno::site()->logging->info("Pubsub subscribed", ['response' => $return]);
                             } else
-                                \Idno\Core\Idno::site()->logging->log("Pubsub: No hubs found");
+                                \Idno\Core\Idno::site()->logging->info("Pubsub: No hubs found");
                         }
                     }
                 });
@@ -121,7 +118,7 @@
                             'hub.topic'    => $following->pubsub_self
                         ));
 
-                        \Idno\Core\Idno::site()->logging->log("Pubsub: " . print_r($return, true));
+                        \Idno\Core\Idno::site()->logging->info("Pubsub unsubscribed.", ['response' => $return]);
                     }
                 });
             }
@@ -234,18 +231,13 @@
 
             /**
              * If this Known installation has a PubSubHubbub hub, send a publish notification to the hub
-             * @param ActivityStreamPost $act_stream_post
+             * @param \Idno\Common\Entity $object
              * @return array
              */
-            static function publish($act_stream_post)
+            static function publish($object)
             {
                 if ($hub = \Idno\Core\Idno::site()->config()->hub) {
 
-                    if (!($act_stream_post instanceof ActivityStreamPost)) {
-                        return false;
-                    }
-
-                    $object = $act_stream_post->getObject();
                     $base   = \Idno\Core\Idno::site()->config()->getDisplayURL();
                     $feeds  = array();
 
@@ -258,7 +250,7 @@
                     $homepage_types   = \Idno\Core\Idno::site()->config()->getHomepageContentTypes();
                     $type_in_homepage = false;
                     if ($object instanceof Entity) {
-                        if (in_array($object->getContentType(), $homepage_types)) {
+                        if (in_array($object->getContentType()->getEntityClass(), $homepage_types)) {
                             $type_in_homepage = true;
                         }
                     }
@@ -287,7 +279,7 @@
                         }
 
                         $formdata = 'hub.mode=publish&hub.url=' . implode(',', $encurls);
-                        \Idno\Core\Idno::site()->logging()->log('Pinging ' . $hub . ' with data ' . $formdata);
+                        \Idno\Core\Idno::site()->logging()->info('Pinging ' . $hub . ' with data ' . $formdata);
                         \Idno\Core\Webservice::post($hub, $formdata, array(
                             'Content-Type' => 'application/x-www-form-urlencoded'));
                     }

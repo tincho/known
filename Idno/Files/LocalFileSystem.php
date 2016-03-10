@@ -83,9 +83,18 @@
                             }
                         }
 
-                        @copy($file_path, $upload_file);
-                        @file_put_contents($data_file, $metadata);
+                        if (!@copy($file_path, $upload_file)) {
+                            throw new \RuntimeException("There was a problem storing the file data.");
+                        }
+                        if (!@file_put_contents($data_file, $metadata)) {
+                                throw new \RuntimeException("There was a problem saving the file's metadata");
+                        }
+
+                        return $id;
                     } catch (\Exception $e) {
+
+                        // Ensure we capture the real error message
+                        \Idno\Core\Idno::site()->logging()->error('Exception while uploading file', ['error' => $e]);
 
                         \Idno\Core\Idno::site()->session()->addMessage("Something went wrong saving your file.");
                         if (\Idno\Core\Idno::site()->session()->isAdmin()) {
@@ -94,7 +103,6 @@
 
                     }
 
-                    return $id;
 
                 }
 

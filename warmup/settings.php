@@ -99,9 +99,13 @@
         curl_close($curl_handle);
     }
 
-    if (file_exists('../config.ini') && $ok) {
-        header('Location: ../begin/register?set_name=' . urlencode($site_title));
-        exit;
+    if ($ok) {
+        if (file_exists('../config.ini')) {
+            if ($config = @parse_ini_file('../config.ini')) {
+                header('Location: ../begin/register?set_name=' . urlencode($site_title));
+                exit;
+            }
+        }
     }
 
     if (!empty($upload_path)) {
@@ -201,8 +205,7 @@ END;
                 </p>
                 <p>
                     On this screen, we'll ask you how we should connect to your database, and where we should save
-                    uploaded files
-                    like user photos, pictures and audio.
+                    uploaded files like user photos, pictures and audio.
                 </p>
             <?php
 

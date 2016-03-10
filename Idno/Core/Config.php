@@ -57,6 +57,7 @@
                 'show_privacy'           => true,
                 'bypass_fulltext_search' => false,
                 'permalink_structure'    => '/:year/:slug',
+                'single_user'            => true,
             );
 
             public $ini_config = array();
@@ -133,8 +134,9 @@
                     unset($config['disable_ssl_verify']);
                     unset($config['upload_tmp_dir']);
                     unset($config['bypass_fulltext_search']);
-                    $this->config = array_merge($this->config, $config);
+                    $this->config = array_replace_recursive($this->config, $config);
                 }
+
                 $this->loadIniFiles();
 
                 // If we don't have a site secret, create it
@@ -154,14 +156,18 @@
                 if (empty($this->ini_config)) {
                     $this->ini_config = array();
                     if ($config = @parse_ini_file($this->path . '/config.ini')) {
-                        $this->default_config = false;
-                        $this->ini_config     = array_merge($config, $this->ini_config);
+                        if (!empty($config)) {
+                            $this->default_config = false;
+                            $this->ini_config     = array_replace_recursive($config, $this->ini_config);
+                        }
                     }
                     if (file_exists($this->path . '/config.json')) {
                         if ($json = file_get_contents($this->path . '/config.json')) {
                             if ($json = json_decode($json, true)) {
-                                $this->default_config = false;
-                                $this->ini_config     = array_replace_recursive($this->ini_config, $json);
+                                if (!empty($json)) {
+                                    $this->default_config = false;
+                                    $this->ini_config     = array_replace_recursive($this->ini_config, $json);
+                                }
                             }
                         }
                     }
@@ -203,7 +209,7 @@
             function save()
             {
                 $array = $this->config;
-                unset($array['dbname']); // Don't save database a
+                unset($array['dbname']); // Don't save database name
                 unset($array['dbpass']);
                 unset($array['dbhost']);
                 unset($array['dbstring']);
@@ -227,7 +233,6 @@
                 if (\Idno\Core\Idno::site()->db()->saveRecord('config', $array)) {
                     $this->init();
                     $this->load();
-
                     return true;
                 }
 
