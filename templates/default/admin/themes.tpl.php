@@ -9,7 +9,8 @@
         </div>
     </div>
 </div>
-    <div class="container">
+<div class="container">
+    <div class="col-md-10 offset-md-1">
         <div class="row">
         <?php
 
@@ -33,6 +34,6 @@
         }
 
         ?>
+        </div>
     </div>
-
 </div>
