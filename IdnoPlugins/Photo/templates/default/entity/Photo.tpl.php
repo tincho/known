@@ -7,8 +7,15 @@
         $multiple = true;
     $cnt = 0;
 
+    $lightBoxEnabled = !!\Idno\Core\Idno::site()->plugins()->get('Lightbox');
+
     $currentPage = \Idno\Core\Idno::site()->currentPage();
-if (!empty($currentPage) && \Idno\Core\Idno::site()->currentPage()->isPermalink()) {
+    $isPermalink = (!empty($currentPage) && $currentPage->isPermalink());
+
+    $title = htmlentities(strip_tags($vars['object']->getTitle()), ENT_QUOTES, 'UTF-8');
+    $isNotUntitled = ($title !== 'Untitled');
+
+if ($isPermalink) {
     $rel = 'rel="in-reply-to"';
 } else {
     $rel = '';
@@ -19,10 +26,10 @@ if (!empty($vars['object']->tags)) {
     $tags = $this->__(['tags' => $vars['object']->tags])->draw('forms/output/tags');
 
 }
-if (empty($vars['feed_view']) && $vars['object']->getTitle() && $vars['object']->getTitle() != 'Untitled') {
+if (empty($vars['feed_view']) && $vars['object']->getTitle() && $isNotUntitled) {
     ?>
         <h2 class="photo-title p-name"><a
-                href="<?php echo $vars['object']->getDisplayURL(); ?>"><?php echo htmlentities(strip_tags($vars['object']->getTitle()), ENT_QUOTES, 'UTF-8'); ?></a>
+                href="<?php echo $vars['object']->getDisplayURL(); ?>"><?php echo $title; ?></a>
         </h2>
 <?php } ?>
 
@@ -32,7 +39,7 @@ if (empty($vars['feed_view']) && $vars['object']->getTitle() && $vars['object']-
     if (!empty($attachments)) {
         foreach ($attachments as $attachment) {
 
-            if (!empty($currentPage) && !\Idno\Core\Idno::site()->currentPage()->isPermalink()) {
+            if (!$isPermalink) {
                 if ($cnt == 5 && $num_pics>$cnt) {
                     ?>
     <div class="photo-view photo-view-more">
@@ -68,14 +75,19 @@ if (empty($vars['feed_view']) && $vars['object']->getTitle() && $vars['object']-
 
             $src = \Idno\Core\Idno::site()->config()->sanitizeAttachmentURL($src);
             $mainsrc = \Idno\Core\Idno::site()->config()->sanitizeAttachmentURL($mainsrc);
-
             ?>
             <div class="photo-view">
-                <a href="<?php echo (!empty($currentPage) && \Idno\Core\Idno::site()->currentPage()->isPermalink()) ? $this->makeDisplayURL($mainsrc) : $vars['object']->getDisplayURL(); ?>" 
-                   data-gallery="<?php echo htmlentities(strip_tags($vars['object']->getTitle()), ENT_QUOTES, 'UTF-8'); ?>"
+                <a href="<?php echo ($isPermalink) ? $this->makeDisplayURL($mainsrc) : $vars['object']->getDisplayURL(); ?>" 
+                   <?php if ($lightBoxEnabled) { ?>
+                   data-toggle="lightbox"
+                   data-remote="<?php echo $this->makeDisplayURL($mainsrc) ?>"
+                   <?php } ?>
+                   data-gallery="<?php echo $vars['object']->_id . $title; ?>"
                    data-original-img="<?php echo $this->makeDisplayURL($mainsrc) ?>"
-                   data-title="<?php echo htmlentities(strip_tags($vars['object']->getTitle()), ENT_QUOTES, 'UTF-8'); ?>" 
-                   data-footer="<?php echo htmlentities(strip_tags($vars['object']->body), ENT_QUOTES, 'UTF-8'); ?>"><img src="<?php echo $this->makeDisplayURL($src) ?>" class="u-photo" alt="<?php echo htmlentities(strip_tags($vars['object']->getTitle()), ENT_QUOTES, 'UTF-8'); ?>" /></a>
+                   data-title="<?php echo ($isNotUntitled) ? $title : ''; ?>" 
+                   data-footer="<?php echo htmlentities(strip_tags($vars['object']->body), ENT_QUOTES, 'UTF-8'); ?>">
+                   <img src="<?php echo $this->makeDisplayURL($src) ?>" class="u-photo" alt="<?php echo $title; ?>" />
+                </a>
             </div>
             <?php
             $cnt ++;
