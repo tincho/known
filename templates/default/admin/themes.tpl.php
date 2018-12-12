@@ -7,6 +7,10 @@
                 <?php echo \Idno\Core\Idno::site()->language()->_('Themes allow you to change the way your site looks. The following themes are installed.'); ?>
             </p>
         </div>
+    </div>
+</div>
+    <div class="container">
+        <div class="row">
         <?php
 
         if (!empty($vars['themes_stored']) && is_array($vars['themes_stored'])) {
