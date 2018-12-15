@@ -87,13 +87,16 @@ if ($title == 'Untitled') {
 
                 </div>
 
-                <p id="show-options">
+                <?php
+                $collapsedOptions = (empty($hide_title) && empty($forward_url));
+                ?>
+                <p id="show-options" style="<?php if(!$collapsedOptions) echo 'display:none'; ?>" >
                     <small><a href="#" onclick="$('#moreoptions').toggle(); $('#show-options').hide(); return false;"><i
-                                class="fa fa-plus"></i>
+                                class="fa fa-plus "></i>
                             <?php echo \Idno\Core\Idno::site()->language()->_('Show advanced options'); ?></a></small>
                 </p>
                 <div id="moreoptions" <?php
-                if (empty($hide_title) && empty($forward_url)) {
+                if ($collapsedOptions) {
                     ?>
                         style="display:none"
                     <?php
